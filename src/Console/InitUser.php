@@ -15,6 +15,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Kreait\Firebase\Factory;
 use Kreait\Firebase\ServiceAccount;
 use Google\Cloud\Firestore\FirestoreClient;
+use Google\Cloud\Core\Timestamp;
 
 class InitUser extends SymfonyCommand
 {
@@ -70,7 +71,84 @@ class InitUser extends SymfonyCommand
 	    }
         }
 	$users->document($uid)->set($data);
-	$users->document($uid)->collection('quest')->document('1')->set(['text'=>'Hello Wordl!']);
+	$this->generateQuestArray($uid,$users);
+    }
+
+    protected function generateQuestArray($uid,$users)
+    {
+	$timestamp = new Timestamp(new \DateTime('2003-02-05 11:15:02.421827Z'));
+	$dates = $this->generateDates();
+	$i = 1;
+	$items = [];
+	foreach($dates as $date) {
+		$item = [
+			'index' => $i,
+			'date'  => new Timestamp($date),
+			'created_at' => new Timestamp(new \DateTime()),
+                        'updated_at' => '',
+			'done' => 0,
+		];
+		$items[$i] = $item;
+		$i++;
+	}
+	foreach($items as $key => $item) {
+		$users->document($uid)->collection('quest')->document($key)->set($item);
+	}
+    }
+    
+    protected function generateDates() 
+    {
+        $dates = [];
+    	$now = new \DateTime();
+	$hour = $now->format('H');
+    	$minute = $now->format('i');
+   	if($hour < 9){
+           $date = new \DateTime();
+           $date->setTime(9,0,0);
+           $dates[] = $date;
+           $date = new \DateTime();
+           $date->setTime(16,0,0);
+           $dates[] = $date;
+           $date = new \DateTime();
+           $date->setTime(23,59,0);
+           $dates[] = $date;
+        }else if($hour < 16){
+           $date = new \DateTime();
+           $date->setTime(16,0,0);
+           $dates[] = $date;
+           $date = new \DateTime();
+           $date->setTime(23,59,0);
+           $dates[] = $date;
+       }else if($hour <= 23 && $minute <= 59){
+           $date = new \DateTime();
+           $date->setTime(23,59,0);
+           $dates[] = $date;
+      }
+
+      for($i=1;$i<=270;$i++){
+        $date = new \DateTime();
+        $date->add(new \DateInterval('P'.$i.'D'));
+        $date->setTime(9,0,0);
+        $dates[] = $date;
+
+        if($i == 89 || $i == 179 || $i == 269) {
+            $date = new \DateTime();
+            $date->add(new \DateInterval('P'.$i.'D'));
+            $date->setTime(12,0,0);
+            $dates[] = $date;
+        }
+
+        $date = new \DateTime();
+        $date->add(new \DateInterval('P'.$i.'D'));
+        $date->setTime(16,0,0);
+        $dates[] = $date;
+        $date = new \DateTime();
+        $date->add(new \DateInterval('P'.$i.'D'));
+        $date->setTime(23,59,0);
+        $dates[] = $date;
+      }
+    
+      return $dates;
     }
 
 }
