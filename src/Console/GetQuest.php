@@ -14,19 +14,18 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Kreait\Firebase\Factory;
 use Kreait\Firebase\ServiceAccount;
+use Google\Cloud\Firestore\FirestoreClient;
 
 class GetQuest extends SymfonyCommand
 {
-    protected $firebase;
+    protected $firestore;
     protected $database;
 
     public function __construct($name = null)
     {
-        $serviceAccount = ServiceAccount::fromJsonFile(__DIR__.'/firebase_credentials.json');
-        $this->firebase = (new Factory)
-            ->withServiceAccount($serviceAccount)
-            ->create();
-        $this->database = $this->firebase->getDatabase();
+	$this->firestore = new FirestoreClient([
+	    'keyFile' => json_decode(file_get_contents(__DIR__.'/firebase_credentials.json'), true)
+	]);
         parent::__construct($name);
     }
 
@@ -49,9 +48,22 @@ class GetQuest extends SymfonyCommand
     {
         $output->writeln('List user quest executed!');
         $uid = $input->getArgument('uid');
-        $reference = $this->database->getReference('usuarios/'.$uid.'/quest');
-        $quest = $reference->getValue();
-        $output->writeln(print_r($quest,true));
+	$users = $this->firestore->collection('usuarios');
+	$documentReference = $users->document($uid);
+	$collections = $documentReference->collections();
+	foreach ($collections as $collection) {
+		$documents = $collection->documents();
+		foreach ($documents as $document) {
+		    if ($document->exists()) {
+		        printf('Document data for document %s:' . PHP_EOL, $document->id());
+			//print_r(get_class_methods($document));
+		        print_r($document->data());
+		        printf(PHP_EOL);
+		    } else {
+	        	printf('Document %s does not exist!' . PHP_EOL, $snapshot->id());
+		    }
+		}
+    	}
     }
 
 }
