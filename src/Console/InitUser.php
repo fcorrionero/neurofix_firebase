@@ -14,8 +14,8 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Kreait\Firebase\Factory;
 use Kreait\Firebase\ServiceAccount;
-use Google\Cloud\Firestore\FirestoreClient;
 use Google\Cloud\Core\Timestamp;
+use Morrislaptop\Firestore\Factory as MorrisFactory;
 
 class InitUser extends SymfonyCommand
 {
@@ -26,14 +26,17 @@ class InitUser extends SymfonyCommand
 
     public function __construct($name = null)
     {
-	      $this->firestore = new FirestoreClient([
-            'keyFile' => json_decode(file_get_contents(__DIR__.'/firebase_credentials.json'), true)
-        ]);
+//	      $this->firestore = new FirestoreClient([
+//            'keyFile' => json_decode(file_get_contents(__DIR__.'/firebase_credentials.json'), true)
+//        ]);
         $serviceAccount = ServiceAccount::fromJsonFile(__DIR__.'/firebase_credentials.json');
-        $this->firebase = (new Factory)
+        $this->firebase = (new MorrisFactory)
             ->withServiceAccount($serviceAccount)
             ->create();
-        $this->auth = $this->firebase->getAuth();
+        $firebase =  (new Factory)
+          ->withServiceAccount($serviceAccount)
+          ->create();
+        $this->auth = $firebase->getAuth();
         parent::__construct($name);
     }
 
@@ -56,7 +59,7 @@ class InitUser extends SymfonyCommand
     {
         $output->writeln('Init-user command executed!');
         $uid = $input->getArgument('uid');
-        $users = $this->firestore->collection('usuarios');
+        $users = $this->firebase->collection('usuarios');
         $authUsers = $this->auth->listUsers($defaultMaxResults = 1000, $defaultBatchSize = 1000);
         $data = [];
         foreach ($authUsers as $user) {

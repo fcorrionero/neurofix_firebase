@@ -23,6 +23,9 @@
     "google/cloud-storage": {
         "version": "v1.10.0"
     },
+    "google/protobuf": {
+        "version": "v3.6.1.3"
+    },
     "grpc/grpc": {
         "version": "1.15.0"
     },
@@ -52,6 +55,9 @@
     },
     "monolog/monolog": {
         "version": "1.24.0"
+    },
+    "morrislaptop/firestore-php": {
+        "version": "v2.2.1"
     },
     "mtdowling/jmespath.php": {
         "version": "2.4.0"
