@@ -7,6 +7,7 @@ use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
+use Google\Cloud\Firestore\FirestoreClient;
 use Kreait\Firebase\Factory;
 use Kreait\Firebase\ServiceAccount;
 

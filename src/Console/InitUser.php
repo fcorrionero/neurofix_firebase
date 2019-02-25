@@ -26,7 +26,7 @@ class InitUser extends SymfonyCommand
 
     public function __construct($name = null)
     {
-	$this->firestore = new FirestoreClient([
+	      $this->firestore = new FirestoreClient([
             'keyFile' => json_decode(file_get_contents(__DIR__.'/firebase_credentials.json'), true)
         ]);
         $serviceAccount = ServiceAccount::fromJsonFile(__DIR__.'/firebase_credentials.json');
