@@ -10,6 +10,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Google\Cloud\Firestore\FirestoreClient;
 use Kreait\Firebase\Factory;
 use Kreait\Firebase\ServiceAccount;
+use Google\Cloud\Core\Timestamp;
 
 class GenerateQuest extends SymfonyCommand
 {
@@ -36,7 +37,7 @@ class GenerateQuest extends SymfonyCommand
     public function configure()
     {
         $this->setName('generate:quest');
-      $this->addArgument('uid', InputArgument::REQUIRED, 'User uid');
+        $this->addArgument('uid', InputArgument::REQUIRED, 'User uid');
     }
 
   /**
@@ -46,14 +47,14 @@ class GenerateQuest extends SymfonyCommand
    */
   public function execute(InputInterface $input, OutputInterface $output)
   {
-    $output->writeln('Init-user command executed!');
-    $uid = $input->getArgument('uid');
-    $users = $this->firestore->collection('usuarios');
-    $authUsers = $this->auth->listUsers($defaultMaxResults = 1000, $defaultBatchSize = 1000);
-    $data = [];
-    foreach ($authUsers as $user) {
-      /** @var \Kreait\Firebase\Auth\UserRecord $user */
-      $output->writeln($user->uid);
+      $output->writeln('Init-user command executed!');
+      $uid = $input->getArgument('uid');
+      $users = $this->firestore->collection('usuarios');
+      /*$authUsers = $this->auth->listUsers($defaultMaxResults = 1000, $defaultBatchSize = 1000);
+      $data = [];
+      foreach ($authUsers as $user) {
+        /** @var \Kreait\Firebase\Auth\UserRecord $user */
+      /*$output->writeln($user->uid);
       if($user->uid == $uid){
         $data = [
           'id' => $user->uid,
@@ -61,14 +62,28 @@ class GenerateQuest extends SymfonyCommand
         ];
         break;
       }
-    }
-    $users->document($uid)->set($data);
-    $this->generateQuestArray($uid,$users);
+    }*/
+      // $user = $users->document($uid);
+      $authUsers = $this->auth->listUsers($defaultMaxResults = 1000, $defaultBatchSize = 1000);
+      foreach ($authUsers as $user){
+          if($uid == $user->uid){
+              $data = [
+                  'id' => $user->uid,
+                  'name' => $user->email,
+              ];
+              break;
+          }
+      }
+      $output->writeln('Init DATA');
+      $users->document($uid)->set($data);
+      $output->writeln('Init ALARMS');
+      $this->generateQuestArray($uid,$users);
+      $output->writeln('DONE');
   }
 
   protected function generateQuestArray($uid,$users)
   {
-    $timestamp = new Timestamp(new \DateTime('2003-02-05 11:15:02.421827Z'));
+    // $timestamp = new Timestamp(new \DateTime('2003-02-05 11:15:02.421827Z'));
     $dates = $this->generateDates();
     $i = 1;
     $items = [];

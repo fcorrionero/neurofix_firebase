@@ -20,8 +20,20 @@
     "google/cloud-core": {
         "version": "v1.25.1"
     },
+    "google/cloud-firestore": {
+        "version": "v1.1.0"
+    },
     "google/cloud-storage": {
         "version": "v1.10.0"
+    },
+    "google/common-protos": {
+        "version": "0.1.0"
+    },
+    "google/gax": {
+        "version": "0.38.0"
+    },
+    "google/grpc-gcp": {
+        "version": "0.1.3"
     },
     "google/protobuf": {
         "version": "v3.6.1.3"
@@ -79,6 +91,9 @@
     },
     "ralouphie/getallheaders": {
         "version": "2.0.5"
+    },
+    "ramsey/uuid": {
+        "version": "3.8.0"
     },
     "rize/uri-template": {
         "version": "0.3.2"

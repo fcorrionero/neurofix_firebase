@@ -14,6 +14,7 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Kreait\Firebase\Factory;
 use Kreait\Firebase\ServiceAccount;
+use Google\Cloud\Firestore\FirestoreClient;
 use Google\Cloud\Core\Timestamp;
 use Morrislaptop\Firestore\Factory as MorrisFactory;
 
@@ -26,9 +27,9 @@ class InitUser extends SymfonyCommand
 
     public function __construct($name = null)
     {
-//	      $this->firestore = new FirestoreClient([
-//            'keyFile' => json_decode(file_get_contents(__DIR__.'/firebase_credentials.json'), true)
-//        ]);
+        $this->firestore = new FirestoreClient([
+            'keyFile' => json_decode(file_get_contents(__DIR__.'/firebase_credentials.json'), true)
+        ]);
         $serviceAccount = ServiceAccount::fromJsonFile(__DIR__.'/firebase_credentials.json');
         $this->firebase = (new MorrisFactory)
             ->withServiceAccount($serviceAccount)
@@ -46,7 +47,7 @@ class InitUser extends SymfonyCommand
     public function configure()
     {
         $this->setName('init:user');
-        $this->addArgument('uid', InputArgument::REQUIRED, 'User uid');
+        //$this->addArgument('uid', InputArgument::REQUIRED, 'User uid');
 
     }
 
@@ -58,23 +59,52 @@ class InitUser extends SymfonyCommand
     public function execute(InputInterface $input, OutputInterface $output)
     {
         $output->writeln('Init-user command executed!');
-        $uid = $input->getArgument('uid');
-        $users = $this->firebase->collection('usuarios');
+        //$uid = $input->getArgument('uid');
+        $users = $this->firestore->collection('usuarios');
         $authUsers = $this->auth->listUsers($defaultMaxResults = 1000, $defaultBatchSize = 1000);
         $data = [];
+        $motherfukers = [
+          '0Ub1HIt32cMm0D2iWp3PrzmpAM33',
+          '1HCSDIVHeSRnAL28RgvBYstVxYf2',
+          '1YyX8xH5EKQDkcPoZ0D8WMTEKWi1',
+          '3efntxOZeESOYWkfe0oIrO7Gs292',
+          '4nzz2QNUubMiuztj7JjV5aULU302',
+          '5H2Cala6ZlNcGb4vmCviPpCjlVY2',
+          '5LgXsIgwl9P72RB1NTRpNTirGs73',
+          '5qARuSqULUXUrAKQ3B4gjeTlNCH2',
+          '5taQAMHydhYVufiMF42yGSfSUlr2',
+          '6CZX02XuoVUV2gSUeuinCIGlrQn1',
+          '707WScsit3Yias7buuSige7qRYy1',
+          '7NXtH3VAlVWcUIpXqtsq7klDODk2',
+          '8QktGpXsARQpBlsLi6tJzaUDDgH3',
+          '8vICldYeBIWTwcgV76P3CfxJy6x2',
+          '8yk9J7JIEjbytoHHCdxLfrReWYP2',
+          '96SbyeUJffatPha6pklZQhQLCSe2',
+          '9MxPK2LQgoTYNbsSq8aGz4piehi2',
+          '9cCNMAuYM2Zj5jrjupSNgCf3CRq1',
+          '9fYNpkT3WhZUfKWgSXWNC530vMe2',
+          'AKiZpNGaU4VLtsj1CqkxUUFkDHL2',
+          'AULSNeOG5iZAPp8KucB3XmBIV5J3',
+          'AhqbpmUlQ4ZGFOOEKrB9uZgxqey2',
+        ];
         foreach ($authUsers as $user) {
             /** @var \Kreait\Firebase\Auth\UserRecord $user */
             $output->writeln($user->uid);
-            if($user->uid == $uid){
+            if(in_array($user->uid,$motherfukers)){
+              continue;
+            }
+            //if($user->uid == $uid){
               $data = [
                 'id' => $user->uid,
                 'name' => $user->email,
               ];
-              break;
-            }
+              //break;
+            //}
+          $users->document($user->uid)->set($data);
+          $this->generateQuestArray($user->uid,$users);
+          $output->writeln("QUEST GENERATED.");
         }
-        $users->document($uid)->set($data);
-        $this->generateQuestArray($uid,$users);
+      $output->writeln("FINISH.");
     }
 
     protected function generateQuestArray($uid,$users)
@@ -94,9 +124,13 @@ class InitUser extends SymfonyCommand
         $items[$i] = $item;
         $i++;
 	    }
+      # [START fs_batch_write]
+      //$batch = $this->firestore->batch();
       foreach($items as $key => $item) {
-        $users->document($uid)->collection('quest')->document($key)->set($item);
+        $document = $users->document($uid)->collection('quest')->document($key)->set($item);
+        //$batch->set($document,$item);
       }
+      //$batch->commit();
     }
     
     protected function generateDates() 
